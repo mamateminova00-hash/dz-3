@@ -48,3 +48,48 @@ function showModalScroll() {
 }
 
 window.addEventListener('scroll', showModalScroll);
+
+
+const somInput = document.querySelector("#som");
+const usdInput = document.querySelector("#usd");
+const eurInput = document.querySelector("#eur");
+
+const converter = (element) => {
+    element.oninput = async () => {
+        try {
+            const response = await fetch('../data/converter.json');
+            
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки курсов валют');
+            }
+
+            const data = await response.json();
+
+            if (element.value === '') {
+                somInput.value = '';
+                usdInput.value = '';
+                eurInput.value = '';
+                return;
+            }
+
+            const val = parseFloat(element.value);
+
+            if (element.id === 'som') {
+                usdInput.value = (val / data.usd).toFixed(2);
+                eurInput.value = (val / data.eur).toFixed(2);
+            } else if (element.id === 'usd') { 
+                somInput.value = (val * data.usd).toFixed(2);
+                eurInput.value = (somInput.value / data.eur).toFixed(2);
+            } else if (element.id === 'eur') {
+                somInput.value = (val * data.eur).toFixed(2);
+                usdInput.value = (somInput.value / data.usd).toFixed(2);
+            }
+        } catch (error) {
+            console.error("Converter error:", error);
+        }
+    };
+};
+
+converter(somInput);
+converter(usdInput);
+converter(eurInput);
